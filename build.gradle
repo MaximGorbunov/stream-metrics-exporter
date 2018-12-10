@@ -1,0 +1,56 @@
+plugins {
+    id 'nebula.release' version '8.0.0'
+    id 'nebula.project' version '5.0.0'
+    id 'nebula.maven-publish' version '8.1.0'
+    id 'org.springframework.boot' version '2.0.6.RELEASE'
+    id 'com.jfrog.artifactory' version '4.8.1'
+    id 'java'
+    id 'idea'
+    id 'io.spring.dependency-management' version '1.0.6.RELEASE'
+}
+
+group = 'com.mgorbunov'
+
+repositories {
+    jcenter()
+}
+
+ext {
+    springCloudVersion = 'Finchley.SR1'
+    extractRepo = { version ->
+        version.contains('-dev') || version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.2'
+    compile 'org.apache.commons:commons-collections4:4.1'
+    compile 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+    compile 'org.springframework.cloud:spring-cloud-stream'
+    compile 'io.micrometer:micrometer-registry-prometheus'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+}
+
+artifactory {
+    publish {
+        contextUrl = project.findProperty('artifactory_contextUrl')
+        repository {
+            repoKey = project.extractRepo(version.toString())
+            username = project.findProperty('artifactory_user')
+            password = project.findProperty('artifactory_password')
+            maven = true
+        }
+        defaults {
+            publications('nebula')
+            publishArtifacts = true
+            publishPom = false
+        }
+    }
+}

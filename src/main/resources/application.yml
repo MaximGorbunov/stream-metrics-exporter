@@ -1,0 +1,11 @@
+spring.cloud.stream.bindings.input.destination: ${TOPIC}
+spring.cloud.stream:
+  kafka.binder:
+    brokers: ${KAFKA_NODES}
+metrics:
+  ttl: ${TTL:30000}
+
+management:
+  endpoints:
+    web:
+      base-path: /
